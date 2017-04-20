@@ -1,40 +1,47 @@
-function sumByFactors(number){
-    for(var i in number)
-    var primes = findAllPrimes(number);
-    return findPrimeFactors(number, primes);
+function sumByFactors(number) {
+    var arrayOfPrimeFactors = flatten(combineAllPrimeFactorsIntoArray(number));
+    return finalAnswer(arrayOfPrimeFactors, number);
+
 
 }
+function combineAllPrimeFactorsIntoArray(number){
+    var arrayOfPrimeFactors = [];
+
+    number = highest(number);
+    var primes = findAllPrimes(number[0]);
+    for(var i in number){
+        arrayOfPrimeFactors.push(findPrimeFactors(number[i], primes));
+
+    }
+    return arrayOfPrimeFactors.sort(function(a,b){return (a - b)});
+
+}
+function highest(number){
+    return [].slice.call(number).sort(function(a,b){
+        return Math.abs(b)-Math.abs(a);
+    });
+}
+
 
 function findAllPrimes(number){
-    primes = [2,3,5];
-    for (var i = 5; i <= number; i++){
-        if(returnTrueIfAPrime(primes, i)){
+    var primes = [2,3,5];
+    for (var i = 5; i <= Math.abs(number); i++){
+        if(returnTrueIfNotDivisibleByOtherPrimes(primes, i)){
             primes.push(i);
         }
     }
+
     return primes;
 }
 
-function returnTrueIfAPrime (primes, i){
-    return (i % 2 !== 0 && returnFalseIfSumOfDigitsIsDivisibleByTree(i) && i % 5 !== 0 && i % 3 !== 0 && returnTrueIfNotDivisibleByOtherPrimes(primes, i));
-}
-
-
-function returnFalseIfSumOfDigitsIsDivisibleByTree(i){
-    var tempNumber = i;
-    var sum = 0;
-    while(tempNumber){
-        sum += tempNumber % 10;
-        tempNumber = Math.floor(tempNumber/10)
-    }
-    return (sum % 3 !== 0)
-
-}
 
 function returnTrueIfNotDivisibleByOtherPrimes(arrayOfPrimes, numberToCheck){
     for (var i in arrayOfPrimes){
         if(numberToCheck % arrayOfPrimes[i] === 0){
             return false;
+        }
+        if(Math.abs(numberToCheck) < Math.abs(arrayOfPrimes[i])){
+            return true;
         }
     }
     return true;
@@ -47,10 +54,58 @@ function findPrimeFactors(number, primes){
         if(number % primes[i] === 0){
             primeFactors.push(primes[i]);
         }
+        if(Math.abs(number) < Math.abs(primes[i])){
+            break;
+        }
     }
-    console.log(primeFactors);
     return primeFactors;
 }
+function flatten(arrayOfPrimeFactors){
+    var flattenedArray = [];
+    for(var i in arrayOfPrimeFactors){
+        while(arrayOfPrimeFactors[i].length > 0) {
+            flattenedArray.push(arrayOfPrimeFactors[i][0]);
+            arrayOfPrimeFactors[i].shift();
 
-sumByFactors(45);
-//returnIfPrime(7);
+        }
+    }
+
+    return removeDuplicatesFromArray(flattenedArray);
+}
+
+function removeDuplicatesFromArray(flattenedArray){
+    flattenedArray.sort(function(a,b){return (a - b)})
+    var nonDuplicates = [];
+    for(var i in flattenedArray){
+        var iPlusOne = parseInt(i)+1;
+        if(flattenedArray[i] !== flattenedArray[iPlusOne]){
+            nonDuplicates.push(flattenedArray[i]);
+        }
+    }
+    return nonDuplicates;
+
+}
+
+
+
+
+function finalAnswer(arrayOfPrimeFactors, number){
+
+    var count = 0;
+    var answer = [];
+    while(count < arrayOfPrimeFactors.length){
+        var totalNumberThatIsDivisible = 0;
+        for (var i in number){
+            if(number[i] % arrayOfPrimeFactors[count] === 0){
+                totalNumberThatIsDivisible += number[i];
+            }
+        }
+        answer.push([arrayOfPrimeFactors[count], totalNumberThatIsDivisible]);
+        count++;
+    }
+    console.log(answer);
+    return answer;
+}
+
+sumByFactors([45, 97, 52, 24, 75483]);
+
